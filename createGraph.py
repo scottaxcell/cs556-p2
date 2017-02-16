@@ -1,4 +1,7 @@
 #!/usr/bin/python
+#
+# Generates a graph and writes the edges to a CSV file
+#
 import sys
 import argparse
 import networkx as nx
@@ -74,7 +77,7 @@ def main(args):
     #
     f = open(args.output, 'w')
     for edge in graph.edges_iter():
-        f.write(str(edge[0]) + ", " + str(edge[1]) + "\n")
+        f.write(str(edge[0]) + "," + str(edge[1]) + "\n")
     f.close()
         
     print "Wrote graph to '" + str(args.output) + "'"
