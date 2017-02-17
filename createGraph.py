@@ -11,7 +11,7 @@ import random
 def createWattsStrogatzGraph(numNodes, numEdges):
     # TODO
     #http://networkx.readthedocs.io/en/stable/reference/generated/networkx.generators.random_graphs.watts_strogatz_graph.html?highlight=watts
-    g = nx.watts_strogatz_graph(numNodes, numNodes, 0.5, seed=random.randint(1, 1000))
+    g = nx.watts_strogatz_graph(numNodes, numEdges, 0.5, seed=random.randint(1, 1000))
     return g
 
 
@@ -19,14 +19,30 @@ def createBarabasiAlbertGraph(numNodes, numEdges):
     #http://networkx.readthedocs.io/en/stable/reference/generated/networkx.generators.random_graphs.barabasi_albert_graph.html?highlight=barabasi
     #barabasi_albert_graph(n, m, seed=None)
     #n = nodes, m = edges
+    #Will give you a scale free network(barabasi_albert_graph) with 50
+    #nodes where each node is connected to three vertices(k=3) with
+    #probability proportional to the degree of the vertex.
     g = nx.barabasi_albert_graph(numNodes, numEdges, seed=random.randint(1, 1000))
     return g
 
 
 def createErdosRenyiGraph(numNodes, numEdges):
     #erdos_renyi_graph(n, p, seed=None, directed=False)
-    g = nx.gnm_random_graph(numNodes, numEdges, seed=random.randint(1, 1000))
-    return g
+    return nx.erdos_renyi_graph(numNodes, 0.01, seed=random.randint(1, 1000))
+    #return nx.gnm_random_graph(numNodes, numEdges, seed=random.randint(1, 1000), True)
+
+    #createGraph = True
+    #while createGraph == True:
+    #    createGraph = False
+    #    graph = nx.gnm_random_graph(numNodes, numEdges, seed=random.randint(1, 1000))
+    #    for node in graph.nodes_iter():
+    #        numNeighbors = 0
+    #        for neighbor in nx.all_neighbors(graph, node):
+    #            numNeighbors += 1
+    #        if numNeighbors == 0:
+    #            print "WARNING: " + str(node) + " in graph has no neighbors!"
+    #            createGraph = True
+    #return graph
 
 
 def printGraph(graph):
@@ -70,7 +86,17 @@ def main(args):
         print "ERROR: cannot create a graph of type '" + str(args.graphType) + "'"
         exit(1)
 
-    print "Generated '" + str(args.graphType) + "' graph with " + str(args.numNodes) + " nodes and " + str(args.numEdges) + " edges"
+    numNodes = nx.number_of_nodes(graph)
+    numEdges = nx.number_of_edges(graph)
+    print "Generated '" + str(args.graphType) + "' graph with " + str(numNodes) + " nodes and " + str(numEdges) + " edges"
+
+    #for node in graph.nodes_iter():
+    #    #neighbors = nx.all_neighbors(graph, node)
+    #    numNeighbors = 0
+    #    for neighbor in nx.all_neighbors(graph, node):
+    #        numNeighbors += 1
+    #    if numNeighbors == 0:
+    #        print "WARNING: " + str(node) + " in graph has a no neighbors!"
 
     #
     # Write graph to CSV output file

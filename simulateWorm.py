@@ -11,14 +11,18 @@ import random
 def createGraph(csv, nodes):
     graph = nx.Graph()
     with open(csv, 'r') as f:
-        for line in f:
-            edges = line.strip().split(',')
+        count = 0
+        for l in f:
+            count += 1
+            edges = l.strip().split(',')
             graph.add_edge(int(edges[0]), int(edges[1]))
             nodes[int(edges[0])] = False
             nodes[int(edges[1])] = False
     numNodes = nx.number_of_nodes(graph)
     numEdges = nx.number_of_edges(graph)
     print "Generated graph with " + str(numNodes) + " nodes and " + str(numEdges) + " edges"
+    #print "Read " + str(count) + " lines"
+    #print "len(nodes) = " + str(len(nodes))
     return graph
 
 
@@ -83,7 +87,7 @@ def simulateWorm(graph, nodes, prob):
                         infectNode(nodes, neighbor)
 
     infectedNodes = getInfectedNodes(nodes)
-    print "Simulation complete after " + str(round) + " rounds, all " + str(len(infectedNodes)) + " infected nodes"
+    print "Simulation complete after " + str(round) + " rounds, all " + str(len(infectedNodes)) + " nodes infected"
 
     return None
 
@@ -106,21 +110,21 @@ def main(args):
     #
     nodes = {} # { node ID, infected }
     graph = createGraph(args.csv, nodes)
-    printGraph(graph)
-    printNodes(nodes)
+    #printGraph(graph)
+    #printNodes(nodes)
 
     #
     # Infect patient zero node
     #
     print "Infecting patient zero node " + str(args.zeroNode)
     infectNode(nodes, args.zeroNode)
-    printNodes(nodes)
+    #printNodes(nodes)
 
     #
     # Run worm simulation
     #
     simulateWorm(graph, nodes, args.prob)
-    printNodes(nodes)
+    #printNodes(nodes)
 
     return None
 
