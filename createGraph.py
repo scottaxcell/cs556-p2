@@ -9,10 +9,8 @@ import random
 
 
 def createWattsStrogatzGraph(numNodes, numEdges):
-    # TODO
     #http://networkx.readthedocs.io/en/stable/reference/generated/networkx.generators.random_graphs.watts_strogatz_graph.html?highlight=watts
-    g = nx.watts_strogatz_graph(numNodes, numEdges, 0.5, seed=random.randint(1, 1000))
-    return g
+    return nx.watts_strogatz_graph(numNodes, numEdges, 0.5, seed=random.randint(1, 1000))
 
 
 def createBarabasiAlbertGraph(numNodes, numEdges):
@@ -22,8 +20,7 @@ def createBarabasiAlbertGraph(numNodes, numEdges):
     #Will give you a scale free network(barabasi_albert_graph) with 50
     #nodes where each node is connected to three vertices(k=3) with
     #probability proportional to the degree of the vertex.
-    g = nx.barabasi_albert_graph(numNodes, numEdges, seed=random.randint(1, 1000))
-    return g
+    return nx.barabasi_albert_graph(numNodes, numEdges, seed=random.randint(1, 1000))
 
 
 def createErdosRenyiGraph(numNodes, numEdges):
