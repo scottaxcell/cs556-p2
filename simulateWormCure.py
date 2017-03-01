@@ -158,9 +158,10 @@ def simulateWorm(graph, nodes, infectProb, cureProb, csvFormat):
     if csvFormat == True:
         print str(round+1) + "," + str(len(infectedNodes))
     else:
-        print "Simulation complete after " + str(round+1) + " rounds"
-        print "Infected nodes: " + str(len(infectedNodes))
-        print "Inoculated nodes: " + str(len(curedNodes))
+        print "Round " + str(round+1) + ": infected = " + str(len(infectedNodes)) + ", inoculated = " + str(len((curedNodes)))
+        #print "Simulation complete after " + str(round+1) + " rounds"
+        #print "Infected nodes: " + str(len(infectedNodes))
+        #print "Inoculated nodes: " + str(len(curedNodes))
 
     return None
 
