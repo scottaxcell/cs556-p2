@@ -6,6 +6,26 @@ import sys
 import argparse
 import networkx as nx
 import random
+from datetime import datetime
+
+
+class Node:
+    def __init__(self, id):
+        self.id = id
+        self.cured = False
+        self.infected = False
+    
+    def infect(self):
+        self.infected = True
+
+    def isInfected(self):
+        return self.infected
+
+    def cure(self):
+        self.cured = True
+
+    def isCured(self):
+        return self.cured
 
 
 def createGraph(csv, nodes):
@@ -16,8 +36,8 @@ def createGraph(csv, nodes):
             count += 1
             edges = l.strip().split(',')
             graph.add_edge(int(edges[0]), int(edges[1]))
-            nodes[int(edges[0])] = False
-            nodes[int(edges[1])] = False
+            nodes[int(edges[0])] = Node(int(edges[0]))
+            nodes[int(edges[1])] = Node(int(edges[1]))
     numNodes = nx.number_of_nodes(graph)
     numEdges = nx.number_of_edges(graph)
     print "Generated graph with " + str(numNodes) + " nodes and " + str(numEdges) + " edges"
@@ -26,10 +46,16 @@ def createGraph(csv, nodes):
     return graph
 
 
-def infectNode(nodes, node):
-    if nodes[node] == True:
-        print "ERROR: infecting an infected node, node: " + str(node)
-    nodes[node] = True
+def infectNode(nodes, nodeID):
+    if nodes[nodeID].isInfected() == True:
+        print "ERROR: infecting an infected node, node: " + str(nodeID)
+    nodes[nodeID].infect()
+    return None 
+
+def cureNode(nodes, nodeID):
+    if nodes[nodeID].isCured() == True:
+        print "ERROR: inoculating an inoculated node, node: " + str(nodeID)
+    nodes[nodeID].cure()
     return None 
 
 
@@ -47,15 +73,15 @@ def printNodes(nodes):
 
 def getInfectedNodes(nodes):
     infectedNodes = []
-    for node, infected in nodes.iteritems():
-        if infected == True:
+    for nodeID, node in nodes.iteritems():
+        if node.isInfected() == True:
             infectedNodes.append(node)
     return infectedNodes
 
 
-def getNeighborNodes(graph, node):
+def getNeighborNodeIDs(graph, node):
     neighbors = []
-    for neighbor in nx.all_neighbors(graph, node):
+    for neighbor in nx.all_neighbors(graph, node.id):
         neighbors.append(neighbor)
     return neighbors
 
@@ -68,47 +94,70 @@ def canInfectNode(prob):
     return random.random() <= prob
 
 
-def simulateWorm(graph, nodes, prob):
+
+
+def simulateWorm(graph, nodes, infectProb, cureProb, csvFormat):
     round = 0
-    while False in nodes.values():
+    numInfectedNodes = 1
+    while numInfectedNodes != len(nodes):
         round += 1
         # Get list of infected nodes
         infectedNodes = getInfectedNodes(nodes)
-        print "Round " + str(round) + ": " + str(len(infectedNodes)) + " infected nodes"
+        if csvFormat == True:
+            print str(round) + "," + str(len(infectedNodes))
+        else:
+            print "Round " + str(round) + ": " + str(len(infectedNodes)) + " infected nodes"
 
         # Get list of adjacent nodes to infected node
         for node in infectedNodes:
-            neighborNodes = getNeighborNodes(graph, node)
-            #print "Node " + str(node) + " has " + str(len(neighborNodes)) + " neighbors"
-            for neighbor in neighborNodes:
+            neighborNodeIDs = getNeighborNodeIDs(graph, node)
+            #print "Node " + str(node.id) + " has " + str(len(neighborNodeIDs)) + " neighbors"
+            for neighborID in neighborNodeIDs:
                 #print "  " + str(neighbor)
-                if isNodeInfected(nodes, neighbor) == False:
-                    if canInfectNode(prob) == True:
-                        infectNode(nodes, neighbor)
+                if nodes[neighborID].isInfected() == False:
+                    if canInfectNode(infectProb) == True:
+                        infectNode(nodes, neighborID)
+        numInfectedNodes = len(getInfectedNodes(nodes))
 
     infectedNodes = getInfectedNodes(nodes)
-    print "Simulation complete after " + str(round) + " rounds, all " + str(len(infectedNodes)) + " nodes infected"
+    if csvFormat == True:
+        print str(round+1) + "," + str(len(infectedNodes))
+    else:
+        print "Simulation complete after " + str(round+1) + " rounds, all " + str(len(infectedNodes)) + " nodes infected"
 
     return None
 
 
+
+
+
 def main(args):
+    #
+    # Seed randomizer
+    #
+    random.seed(datetime.now())
     #
     # Parse arguments
     #
     parser = argparse.ArgumentParser(description='Reads a graph from a CSV and runs a worm simulation.')
     parser.add_argument('--csv', dest='csv', required=True,
                         help='CSV input file.')
-    parser.add_argument('--prob', dest='prob', required=True, type=float,
+    parser.add_argument('--infect_prob', dest='infect_prob', required=True, type=float,
                         help='Probability of worm infecting an un-infected node.')
-    parser.add_argument('--zero', dest='zeroNode', required=True, type=int,
+    parser.add_argument('--cure_prob', dest='cure_prob', type=float, default=0,
+                        help='Probability of cure inoculating an infected node.')
+    parser.add_argument('--infect_zero', dest='infectZero', required=True, type=int,
                         help='Patient zero node with initial infection.')
+    parser.add_argument('--cure_zero', dest='cureZero', type=int, default=-1,
+                        help='Patient zero node with initial cure.')
+    parser.add_argument('--csvFormat', dest='csvFormat', action='store_true',
+                        help='Write round information in a CSV format.')
     args = parser.parse_args()
 
     #
     # Generate from CSV input
     #
-    nodes = {} # { node ID, infected }
+    nodes = {} # Hash of Node objects
     graph = createGraph(args.csv, nodes)
     #printGraph(graph)
     #printNodes(nodes)
@@ -116,14 +165,17 @@ def main(args):
     #
     # Infect patient zero node
     #
-    print "Infecting patient zero node " + str(args.zeroNode)
-    infectNode(nodes, args.zeroNode)
+    print "Infecting patient zero node " + str(args.infectZero)
+    infectNode(nodes, args.infectZero)
+    if (args.cureZero != -1):
+        print "Inoculating patient zero node " + str(args.cureZero)
+        cureNode(nodes, args.cureZero)
     #printNodes(nodes)
 
     #
     # Run worm simulation
     #
-    simulateWorm(graph, nodes, args.prob)
+    simulateWorm(graph, nodes, args.infect_prob, args.cure_prob, args.csvFormat)
     #printNodes(nodes)
 
     return None
