@@ -1,0 +1,11 @@
+erdos_500.csv
+erdos_600.csv
+erdos_800.csv
+erdos_700.csv
+erdos_900.csv
+erdos_1000.csv
+erdos_1500.csv
+erdos_2000.csv
+erdos_5000.csv
+erdos_10000.csv
+erdos_20000.csv
