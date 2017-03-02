@@ -47,7 +47,7 @@ foreach my $csvFile (@csvFiles) {
         $roundInfo .= $2 . ",";
       }
       if ($line =~ m/Generated graph.+/) {
-        $graphLine = "\n\n$line"; # store the node and edges information of the graph
+        $graphLine = "\n$line\n"; # store the node and edges information of the graph
       }
     }
     $roundInfo .= "\n";

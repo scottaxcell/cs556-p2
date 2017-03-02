@@ -28,7 +28,7 @@ foreach my $csvFile (@csvFiles) {
   my $infectProb = 0.5;
   my $infectZero = 1;
   my $cureProb = 0.5;
-  my $cureZero = 1;
+  my $cureZero = 100;
   my $totalRounds = 0;
   my @output = ();
   my $graphLine = "";
@@ -40,6 +40,8 @@ foreach my $csvFile (@csvFiles) {
   push @output, "Cure Patient zero: $cureZero\n";
   for (1..$numRuns) { # Run the experiment 10 times
     my $cmd = "python ./simulateWormCure.py --infect_prob $infectProb --infect_zero $infectZero --csv $csvFile --cure_prob $cureProb --cure_zero $cureZero";
+    #print $cmd."\n";
+    #next;
     my $stdout = `$cmd`;
     
     my $roundInfo = ""; # store number of infected nodes per round for the simulation
@@ -51,7 +53,7 @@ foreach my $csvFile (@csvFiles) {
         $roundInfo .= $2 . ",";
       }
       if ($line =~ m/Generated graph.+/) {
-        $graphLine = "\n\n$line"; # store the node and edges information of the graph
+        $graphLine = "\n\n$line\n"; # store the node and edges information of the graph
       }
     }
     $roundInfo .= "\n";
